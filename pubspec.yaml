@@ -1,0 +1,58 @@
+name: flutter_base_app
+description: Proyecto base Flutter con dependencias recomendadas.
+publish_to: 'none'  # Prevent publishing to pub.dev
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.8.0 <4.0.0"  # Dart SDK version constraint
+  flutter: ">=3.10.0"
+
+# Runtime dependencies required by the app
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- State Management ---
+  flutter_bloc: ^9.1.1            # BLoC pattern for state management
+  provider: ^6.1.4                # Provider for dependency injection & state
+
+  # --- Routes Management ---
+  go_router: ^16.2.1
+
+  # --- Utilities ---
+  freezed_annotation: ^3.1.0      # Annotations for freezed code generation
+  get_it: ^8.0.3                  # Service locator for dependency injection
+  rxdart: ^0.28.0                 # Reactive programming with Dart Streams
+
+  # --- Error Monitoring ---
+  sentry_flutter: ^8.12.0         # Error tracking and performance monitoring
+
+  # --- Environment Variables ---
+  envied: ^1.1.1                  # Type-safe environment variables
+
+  # --- JSON Serialization ---
+  json_annotation: ^4.9.0         # JSON model annotations
+
+  # --- Localization support ---
+  flutter_localizations:
+    sdk: flutter
+
+# Development dependencies used for testing, code generation, and build tooling
+dev_dependencies:
+  flutter_test:
+    sdk: flutter                 # Flutter's test framework
+
+  # --- Code generation ---
+  build_runner: ^2.7.1           # Run code generators
+  freezed: ^3.2.3                # Code generation for immutable classes and unions
+  json_serializable: ^6.11.1     # JSON serialization generator
+  envied_generator: ^1.1.1       # Code generator for envied
+
+  # --- Testing & Mocking ---
+  bloc_test: ^10.0.0             # Utilities for testing BLoCs
+  mocktail: ^1.0.4               # Alternative mocking framework
+  test: ^1.25.15                 # Core Dart test package
+
+flutter:
+  uses-material-design: true
+  # Puedes agregar aquí assets o configuraciones adicionales
