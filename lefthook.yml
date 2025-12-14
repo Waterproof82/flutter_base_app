@@ -1,0 +1,18 @@
+# terraform/templates/lefthook.yml.tpl
+pre-commit:
+  parallel: true
+  commands:
+    analyze:
+      glob: "*.dart"
+      run: flutter analyze
+
+    check-format:
+      glob: "*.dart"
+      # NOTA: Doble $$ para que Terraform lo ignore y escriba uno solo en el archivo final
+      run: dart format --set-exit-if-changed ${staged_files}
+
+    secrets-check:
+      glob: "*.{dart,json,properties,env,yaml,yml}"
+      exclude: "lefthook.yml"
+      # Aquí también escapamos el staged_files
+      run: sh -c '! grep -rnE "password|secret|api_key" ${staged_files}'
