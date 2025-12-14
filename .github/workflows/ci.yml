@@ -1,0 +1,78 @@
+name: CI/CD Pipeline Optimized (Android)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "develop" ]
+  workflow_dispatch:
+
+jobs:
+  build_and_release:
+    name: 🚀 Test & Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Secretos y Configuración
+      - name: Create .env & Secrets
+        run: |
+          echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" > .env
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > android/app/google-services.json
+          echo "storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=upload-keystore.jks" >> android/key.properties
+
+      # Calidad y Tests
+      - name: Run Code Generators & Tests
+        run: |
+          flutter pub run build_runner build --delete-conflicting-outputs
+          dart format --set-exit-if-changed --output=none .
+          flutter analyze --fatal-infos --fatal-warnings
+          flutter test --no-pub
+
+      # Build APK
+      - name: Build APK Release
+        run: flutter build apk --release
+
+      # Guardar Artefacto
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  status_report:
+    name: 📢 Status Report
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [build_and_release]
+    steps:
+      - name: Check Status
+        run: |
+          if [ "${{ needs.build_and_release.result }}" == "success" ]; then
+            echo "✅ SUCCESS: APK Ready."
+          else
+            echo "❌ FAILURE."
+            exit 1
+          fi
